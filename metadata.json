@@ -1,0 +1,6 @@
+{
+  "name": "CodeInIndia",
+  "description": "Learn to build dynamic websites, SaaS & apps. Live cohorts in Hindi + English.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

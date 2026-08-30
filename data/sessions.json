@@ -1,0 +1,28 @@
+{
+  "ci_adm_dbce0ba95a21120e75160944a3675ab4120b4cf4851d24d2": {
+    "admin": {
+      "id": "ADM-001",
+      "name": "Harsh Vardhan (Lead)",
+      "email": "admin@codeinindia.in",
+      "role": "SUPER_ADMIN",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+      "status": "ACTIVE",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "lastLoginAt": "2026-08-18T17:03:55.070Z"
+    },
+    "expiresAt": "2026-08-19T01:03:55.070Z"
+  },
+  "ci_adm_2fef7d3db96ca7fd1fad8a9c88eda046dedddc12db59b54f": {
+    "admin": {
+      "id": "ADM-001",
+      "name": "Harsh Vardhan (Lead)",
+      "email": "admin@codeinindia.in",
+      "role": "SUPER_ADMIN",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+      "status": "ACTIVE",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "lastLoginAt": "2026-08-18T17:08:54.127Z"
+    },
+    "expiresAt": "2026-08-19T01:08:54.128Z"
+  }
+}

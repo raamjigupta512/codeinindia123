@@ -1,0 +1,38 @@
+[
+  {
+    "id": "comm-947608",
+    "sentAt": "2026-08-18T17:09:07.608Z",
+    "recipientType": "STUDENT",
+    "recipientEmail": "test@student.in",
+    "recipientPhone": "9876543210",
+    "channel": "WHATSAPP",
+    "templateId": "tpl_welcome_paid_cohort",
+    "subject": "CodeInIndia Enrollment Confirmed: CI-TEST-000002",
+    "status": "DELIVERED",
+    "adminName": "AUTOMATION_ENGINE"
+  },
+  {
+    "id": "comm-1",
+    "recipientType": "STUDENT",
+    "recipientEmail": "aarav.sharma@example.com",
+    "recipientPhone": "9876543210",
+    "channel": "WHATSAPP",
+    "templateId": "tpl_welcome_paid_cohort",
+    "subject": "Welcome to CodeInIndia Cohort! Your Enrollment ID: CI-2026-000001",
+    "status": "DELIVERED",
+    "sentAt": "2026-02-01T10:15:35.000Z",
+    "adminName": "SYSTEM_AUTOMATION"
+  },
+  {
+    "id": "comm-2",
+    "recipientType": "LEAD",
+    "recipientEmail": "kavya.nair@example.com",
+    "recipientPhone": "9845112233",
+    "channel": "EMAIL",
+    "templateId": "tpl_workshop_reminder_24h",
+    "subject": "Reminder: Live Workshop starts tomorrow at 8:00 PM IST",
+    "status": "DELIVERED",
+    "sentAt": "2026-02-16T10:00:00.000Z",
+    "adminName": "SYSTEM_AUTOMATION"
+  }
+]

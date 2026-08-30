@@ -1,0 +1,222 @@
+[
+  {
+    "id": "pay_sim_72947591",
+    "orderId": "order_sim_72947591",
+    "signature": "",
+    "studentName": "Test Student",
+    "studentEmail": "test@student.in",
+    "studentMobile": "9876543210",
+    "courseId": "crs-workshop-2d",
+    "courseName": "1-Day Dynamic Website Workshop",
+    "amount": 999,
+    "currency": "INR",
+    "status": "PAID",
+    "paymentMethod": "Razorpay Webhook Simulation",
+    "gateway": "Razorpay (Test Mode)",
+    "isTest": true,
+    "verifiedAt": "2026-08-18T17:09:07.592Z",
+    "createdAt": "2026-08-18T17:09:07.592Z",
+    "lifecycle": [
+      {
+        "stage": "ORDER_CREATED",
+        "timestamp": "2026-08-18T17:09:07.592Z",
+        "details": "Order created for ₹999",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "PAYMENT_CAPTURED",
+        "timestamp": "2026-08-18T17:09:07.592Z",
+        "details": "Captured via Razorpay Webhook Simulation",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "SIGNATURE_VERIFIED",
+        "timestamp": "2026-08-18T17:09:07.592Z",
+        "details": "Server HMAC-SHA256 verified successfully",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "ENROLLMENT_GENERATED",
+        "timestamp": "2026-08-18T17:09:07.592Z",
+        "details": "Assigned Enrollment ID: CI-TEST-000002",
+        "status": "SUCCESS"
+      }
+    ]
+  },
+  {
+    "id": "pay_Nx8Z91823901a1",
+    "orderId": "order_Nx8Y29s8192a01",
+    "studentId": "STU-2026-00101",
+    "studentName": "Aarav Sharma",
+    "studentEmail": "aarav.sharma@example.com",
+    "studentMobile": "9876543210",
+    "courseId": "crs-cohort-4w",
+    "courseName": "Full-Stack 4-Week Live Cohort",
+    "amount": 4999,
+    "currency": "INR",
+    "status": "PAID",
+    "paymentMethod": "UPI",
+    "gateway": "Razorpay",
+    "isTest": false,
+    "verifiedAt": "2026-02-01T10:15:30.000Z",
+    "createdAt": "2026-02-01T10:14:10.000Z",
+    "lifecycle": [
+      {
+        "stage": "ORDER_CREATED",
+        "timestamp": "2026-02-01T10:14:10.000Z",
+        "details": "Order generated on backend for ₹4,999",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "CHECKOUT_OPENED",
+        "timestamp": "2026-02-01T10:14:20.000Z",
+        "details": "Razorpay Standard Modal opened",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "PAYMENT_CAPTURED",
+        "timestamp": "2026-02-01T10:15:28.000Z",
+        "details": "Payment captured by Razorpay Gateway via UPI",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "SIGNATURE_VERIFIED",
+        "timestamp": "2026-02-01T10:15:30.000Z",
+        "details": "HMAC-SHA256 signature verified server-side",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "ENROLLMENT_GENERATED",
+        "timestamp": "2026-02-01T10:15:32.000Z",
+        "details": "Generated unique Enrollment ID: CI-2026-000001",
+        "status": "SUCCESS"
+      }
+    ]
+  },
+  {
+    "id": "pay_Px9281920192a2",
+    "orderId": "order_Px9102938102a2",
+    "studentId": "STU-2026-00102",
+    "studentName": "Priya Patel",
+    "studentEmail": "priya.p@example.com",
+    "studentMobile": "9123456789",
+    "courseId": "crs-cohort-4w",
+    "courseName": "Full-Stack 4-Week Live Cohort",
+    "amount": 4999,
+    "currency": "INR",
+    "status": "PAID",
+    "paymentMethod": "Credit Card",
+    "gateway": "Razorpay",
+    "isTest": false,
+    "verifiedAt": "2026-02-03T11:22:15.000Z",
+    "createdAt": "2026-02-03T11:21:00.000Z",
+    "lifecycle": [
+      {
+        "stage": "ORDER_CREATED",
+        "timestamp": "2026-02-03T11:21:00.000Z",
+        "details": "Order created",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "SIGNATURE_VERIFIED",
+        "timestamp": "2026-02-03T11:22:15.000Z",
+        "details": "HMAC-SHA256 signature verified",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "ENROLLMENT_GENERATED",
+        "timestamp": "2026-02-03T11:22:16.000Z",
+        "details": "Assigned Enrollment ID: CI-2026-000002",
+        "status": "SUCCESS"
+      }
+    ]
+  },
+  {
+    "id": "pay_Rx192830192a03",
+    "orderId": "order_Rx182910283a03",
+    "studentId": "STU-2026-00103",
+    "studentName": "Rohan Mehra",
+    "studentEmail": "rohan.mehra@example.com",
+    "studentMobile": "9822334455",
+    "courseId": "crs-workshop-2d",
+    "courseName": "2-Day Live Weekend Builder Workshop",
+    "amount": 2999,
+    "currency": "INR",
+    "status": "PAID",
+    "paymentMethod": "NetBanking",
+    "gateway": "Razorpay",
+    "isTest": false,
+    "verifiedAt": "2026-02-05T14:12:00.000Z",
+    "createdAt": "2026-02-05T14:11:00.000Z",
+    "lifecycle": []
+  },
+  {
+    "id": "pay_Sx792837182a04",
+    "orderId": "order_Sx781928371a04",
+    "studentId": "STU-2026-00104",
+    "studentName": "Sana Malik",
+    "studentEmail": "sana.malik@example.com",
+    "studentMobile": "9765432109",
+    "courseId": "crs-cohort-4w",
+    "courseName": "Full-Stack 4-Week Live Cohort",
+    "amount": 4999,
+    "currency": "INR",
+    "status": "PAID",
+    "paymentMethod": "UPI",
+    "gateway": "Razorpay",
+    "isTest": false,
+    "verifiedAt": "2026-02-08T09:02:10.000Z",
+    "createdAt": "2026-02-08T09:01:00.000Z",
+    "lifecycle": []
+  },
+  {
+    "id": "pay_fail_991823a99",
+    "orderId": "order_fail_991823",
+    "studentName": "Manish Pandey",
+    "studentEmail": "manish.p@example.com",
+    "studentMobile": "9711002233",
+    "courseId": "crs-cohort-4w",
+    "courseName": "Full-Stack 4-Week Live Cohort",
+    "amount": 4999,
+    "currency": "INR",
+    "status": "FAILED",
+    "paymentMethod": "UPI",
+    "gateway": "Razorpay",
+    "isTest": false,
+    "createdAt": "2026-02-16T14:40:00.000Z",
+    "errorReason": "Payment declined by issuer bank (insufficient balance or auth timeout)",
+    "lifecycle": [
+      {
+        "stage": "ORDER_CREATED",
+        "timestamp": "2026-02-16T14:39:00.000Z",
+        "details": "Order created",
+        "status": "SUCCESS"
+      },
+      {
+        "stage": "PAYMENT_CAPTURED",
+        "timestamp": "2026-02-16T14:40:00.000Z",
+        "details": "Failed at bank gateway",
+        "status": "FAILED"
+      }
+    ]
+  },
+  {
+    "id": "pay_test_99182391",
+    "orderId": "order_test_99182390",
+    "studentId": "STU-2026-TEST-001",
+    "studentName": "Vikram QA Tester",
+    "studentEmail": "vikram.tester@qa.internal",
+    "studentMobile": "9999900001",
+    "courseId": "crs-cohort-4w",
+    "courseName": "Full-Stack 4-Week Live Cohort",
+    "amount": 1,
+    "currency": "INR",
+    "status": "PAID",
+    "paymentMethod": "Test Card",
+    "gateway": "Razorpay (Test Mode)",
+    "isTest": true,
+    "verifiedAt": "2026-02-16T12:01:00.000Z",
+    "createdAt": "2026-02-16T12:00:30.000Z",
+    "lifecycle": []
+  }
+]

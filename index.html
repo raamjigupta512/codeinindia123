@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeInIndia — Learn to build dynamic websites, SaaS & apps. Live, in Hindi + English.</title>
+    <script>
+      // Early suppression of third-party browser extension injection noise (e.g. MetaMask, web3 injectors, disconnected background ports)
+      (function() {
+        var isExtensionError = function(msg) {
+          if (!msg) return false;
+          var str = typeof msg === 'string' ? msg : (msg.message || msg.stack || String(msg));
+          return str.indexOf('MetaMask') !== -1 ||
+                 str.indexOf('metamask') !== -1 ||
+                 str.indexOf('Failed to connect to MetaMask') !== -1 ||
+                 str.indexOf('ethereum') !== -1 ||
+                 str.indexOf('chrome-extension://') !== -1 ||
+                 str.indexOf('moz-extension://') !== -1 ||
+                 str.indexOf('Could not establish connection. Receiving end does not exist') !== -1 ||
+                 str.indexOf('Receiving end does not exist') !== -1 ||
+                 str.indexOf('The message port closed before a response was received') !== -1;
+        };
+
+        var originalConsoleError = console.error;
+        console.error = function() {
+          for (var i = 0; i < arguments.length; i++) {
+            if (isExtensionError(arguments[i])) {
+              return;
+            }
+          }
+          originalConsoleError.apply(console, arguments);
+        };
+
+        var originalConsoleWarn = console.warn;
+        console.warn = function() {
+          for (var i = 0; i < arguments.length; i++) {
+            if (isExtensionError(arguments[i])) {
+              return;
+            }
+          }
+          originalConsoleWarn.apply(console, arguments);
+        };
+
+        window.addEventListener('error', function(e) {
+          if (isExtensionError(e.message) || isExtensionError(e.filename) || isExtensionError(e.error)) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(e) {
+          if (isExtensionError(e.reason)) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
+    <meta name="description" content="CodeInIndia teaches you to build and ship real dynamic websites, SaaS products and mobile apps with AI-assisted coding. Live cohorts in Hindi + English. Reserve your seat.">
+    <meta property="og:title" content="CodeInIndia — Build. Ship. Earn.">
+    <meta property="og:description" content="Live classes on dynamic websites, SaaS & app building. Hindi + English. Certificate included.">
+    <meta property="og:type" content="website">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

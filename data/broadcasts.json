@@ -1,0 +1,36 @@
+[
+  {
+    "id": "bc-942013",
+    "sentAt": "2026-08-18T17:09:02.013Z",
+    "status": "SENT",
+    "channel": "WHATSAPP",
+    "targetAudience": "ALL_PAID",
+    "subject": "Welcome",
+    "title": "Welcome",
+    "message": "Test message {{name}}",
+    "recipientCount": 48,
+    "adminName": "Harsh Vardhan (Lead)"
+  },
+  {
+    "id": "bc-1",
+    "subject": "Important: Live Cohort Orientation Zoom Link for Saturday",
+    "message": "Hey {{name}}, welcome to CodeInIndia! Your official Enrollment ID is {{enrollment_id}}. The live cohort orientation kicks off Saturday at 8:00 PM IST.",
+    "targetAudience": "ALL_PAID",
+    "channel": "WHATSAPP",
+    "sentAt": "2026-02-15T14:30:00.000Z",
+    "status": "SENT",
+    "recipientCount": 240,
+    "adminName": "Super Admin"
+  },
+  {
+    "id": "bc-2",
+    "subject": "Reminder: 1-Day Dynamic Website Workshop Starts in 2 Hours",
+    "message": "Hi {{name}}, your live builder sprint for 5 Dynamic Websites begins today! Check your registered email for Zoom + GitHub starter templates.",
+    "targetAudience": "WORKSHOP_ATTENDEES",
+    "channel": "EMAIL",
+    "sentAt": "2026-02-10T16:00:00.000Z",
+    "status": "SENT",
+    "recipientCount": 512,
+    "adminName": "Operations Lead"
+  }
+]
