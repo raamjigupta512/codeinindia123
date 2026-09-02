@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Connection testing
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // Leads / Registrations
+    function isValidLead(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() <= 20 &&
+             data.track is string && data.track.size() <= 100 &&
+             data.createdAt is string && data.createdAt.size() <= 60;
+    }
+
+    match /leads/{leadId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isValidId(leadId) && isValidLead(incoming());
+      allow update: if isSignedIn() && isValidLead(incoming()) &&
+                    incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn();
+    }
+
+    // Students
+    function isValidStudent(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() <= 20 &&
+             data.courseCode is string && data.courseCode.size() <= 50 &&
+             data.status in ['ENROLLED', 'ACTIVE', 'COMPLETED', 'DROPPED'] &&
+             data.enrolledAt is string && data.enrolledAt.size() <= 60;
+    }
+
+    match /students/{studentId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isValidId(studentId) && isValidStudent(incoming());
+      allow update: if isSignedIn() && isValidStudent(incoming()) &&
+                    incoming().enrolledAt == existing().enrolledAt;
+      allow delete: if isSignedIn();
+    }
+
+    // Payments
+    function isValidPayment(data) {
+      return data.paymentId is string && data.paymentId.size() > 0 && data.paymentId.size() <= 100 &&
+             data.amount is number && data.amount >= 0 &&
+             data.currency is string && data.currency.size() <= 10 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
+             data.status in ['SUCCESS', 'FAILED', 'PENDING', 'REFUNDED'] &&
+             data.createdAt is string && data.createdAt.size() <= 60;
+    }
+
+    match /payments/{paymentId} {
+      allow get: if true;
+      allow list: if isSignedIn();
+      allow create: if isValidId(paymentId) && isValidPayment(incoming());
+      allow update: if isSignedIn() && isValidPayment(incoming()) &&
+                    incoming().paymentId == existing().paymentId &&
+                    incoming().createdAt == existing().createdAt;
+      allow delete: if false;
+    }
+
+    // Curriculum Progress
+    function isValidCurriculumProgress(data) {
+      return data.userId is string && data.userId.size() > 0 && data.userId.size() <= 100 &&
+             data.activeWeek is number && data.activeWeek >= 1 && data.activeWeek <= 10 &&
+             data.completedLessonIds is list &&
+             data.progressPercent is number && data.progressPercent >= 0 && data.progressPercent <= 100 &&
+             data.lastUpdated is string && data.lastUpdated.size() <= 60;
+    }
+
+    match /curriculum_progress/{progressId} {
+      allow get: if true;
+      allow list: if isSignedIn();
+      allow create, update: if isValidId(progressId) && isValidCurriculumProgress(incoming());
+      allow delete: if isSignedIn();
+    }
+  }
+}

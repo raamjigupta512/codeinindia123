@@ -1,0 +1,164 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "User registration lead submitted through landing page",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 200
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "track": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "status": {
+          "type": "string",
+          "enum": ["NEW", "CONTACTED", "CONVERTED", "ABANDONED"]
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "email", "phone", "track", "createdAt"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Enrolled student record in the CodeInIndia academy",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 200
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "courseCode": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ENROLLED", "ACTIVE", "COMPLETED", "DROPPED"]
+        },
+        "enrolledAt": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "email", "phone", "courseCode", "status", "enrolledAt"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "Processed Razorpay payment transactions",
+      "type": "object",
+      "properties": {
+        "paymentId": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "orderId": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "amount": {
+          "type": "number"
+        },
+        "currency": {
+          "type": "string",
+          "maxLength": 10
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 200
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "status": {
+          "type": "string",
+          "enum": ["SUCCESS", "FAILED", "PENDING", "REFUNDED"]
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": ["paymentId", "amount", "currency", "email", "status", "createdAt"]
+    },
+    "CurriculumProgress": {
+      "title": "CurriculumProgress",
+      "description": "Student or visitor curriculum roadmap and lesson progress tracking",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "activeWeek": {
+          "type": "number"
+        },
+        "completedLessonIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "progressPercent": {
+          "type": "number"
+        },
+        "lastUpdated": {
+          "type": "string"
+        }
+      },
+      "required": ["userId", "activeWeek", "completedLessonIds", "progressPercent", "lastUpdated"]
+    }
+  },
+  "firestore": {
+    "/leads/{leadId}": {
+      "schema": {
+        "$ref": "#/entities/Lead"
+      },
+      "description": "Public registration leads collection"
+    },
+    "/students/{studentId}": {
+      "schema": {
+        "$ref": "#/entities/Student"
+      },
+      "description": "Enrolled students directory"
+    },
+    "/payments/{paymentId}": {
+      "schema": {
+        "$ref": "#/entities/Payment"
+      },
+      "description": "Payment verification records"
+    },
+    "/curriculum_progress/{progressId}": {
+      "schema": {
+        "$ref": "#/entities/CurriculumProgress"
+      },
+      "description": "Curriculum progress tracking documents"
+    }
+  }
+}

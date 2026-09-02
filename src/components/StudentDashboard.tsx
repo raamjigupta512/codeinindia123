@@ -31,6 +31,10 @@ import {
 } from 'lucide-react';
 import { StudentProjectRepo, StudentLiveSession, StudentModuleItem, EnrolledStudentProfile } from '../types/student';
 import { CURRICULUM_WEEKS } from '../types';
+import { 
+  saveCurriculumProgressToFirestore, 
+  getCurriculumProgressFromFirestore 
+} from '../lib/firebase';
 
 interface StudentDashboardProps {
   onBackToHome: () => void;
@@ -176,16 +180,34 @@ export default function StudentDashboard({ onBackToHome, onOpenCertificateVerify
   };
 
   const handleToggleLesson = (moduleId: string, lessonId: string) => {
-    setModules(prev =>
-      prev.map(mod => {
+    setModules(prev => {
+      const next = prev.map(mod => {
         if (mod.id !== moduleId) return mod;
         const updatedLessons = mod.lessons.map(l =>
           l.id === lessonId ? { ...l, isDone: !l.isDone } : l
         );
         const allDone = updatedLessons.every(l => l.isDone);
         return { ...mod, lessons: updatedLessons, isCompleted: allDone };
-      })
-    );
+      });
+
+      // Asynchronously persist to Firebase Firestore
+      const allLessons = next.flatMap(m => m.lessons);
+      const completedIds = allLessons.filter(l => l.isDone).map(l => l.id);
+      const percent = Math.round((completedIds.length / allLessons.length) * 100);
+      const studentId = student?.enrollmentId || 'CI-2026-000001';
+
+      saveCurriculumProgressToFirestore(studentId, {
+        userId: studentId,
+        activeWeek: 4,
+        completedLessonIds: completedIds,
+        progressPercent: percent,
+        lastUpdated: new Date().toISOString()
+      }).catch(err => {
+        console.warn('Firestore curriculum progress save notice:', err);
+      });
+
+      return next;
+    });
   };
 
   const handleSubmitProject = async (e: React.FormEvent) => {

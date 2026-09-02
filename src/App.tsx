@@ -25,8 +25,11 @@ import {
   ChevronDown,
   FileDown,
   Download,
-  FileText
+  FileText,
+  QrCode,
+  Share2
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import Navbar from './components/Navbar';
 import TerminalReplay from './components/TerminalReplay';
 import CountdownTimer from './components/CountdownTimer';
@@ -68,6 +71,8 @@ import { detectUserIntent, PERSONA_INTENTS, PersonaIntent } from './utils/intent
 export default function App() {
   const [copied, setCopied] = useState(false);
   const inviteUrl = "https://codeinindia.in/?ref=invite";
+  const [inviteQrCode, setInviteQrCode] = useState<string>('');
+  const [isGeneratingQr, setIsGeneratingQr] = useState<boolean>(true);
   const [seatsLeft, setSeatsLeft] = useState(14);
 
   // App Route: 'public' | 'admin' | 'verify' | 'dashboard'
@@ -168,10 +173,41 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    // Generate high-resolution QR code for in-person mobile sharing
+    QRCode.toDataURL(inviteUrl, {
+      width: 320,
+      margin: 2,
+      color: {
+        dark: '#0F172A',
+        light: '#FFFFFF',
+      },
+      errorCorrectionLevel: 'M',
+    })
+      .then((url) => {
+        setInviteQrCode(url);
+        setIsGeneratingQr(false);
+      })
+      .catch((err) => {
+        console.error('Failed to generate invite QR code', err);
+        setIsGeneratingQr(false);
+      });
+  }, [inviteUrl]);
+
   const handleCopyInvite = () => {
     navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadInviteQr = () => {
+    if (!inviteQrCode) return;
+    const a = document.createElement('a');
+    a.href = inviteQrCode;
+    a.download = 'CodeInIndia-Invite-QR.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const handleScrollToRegister = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -234,11 +270,21 @@ export default function App() {
   return (
     <AdminAuthProvider>
       <div className="min-h-screen bg-paper text-ink selection:bg-marigold/30 overflow-x-hidden" id="app-root">
-        {/* ============ NAVIGATION ============ */}
-      <Navbar />
+        {/* Accessible Skip to Content Link */}
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-marigold focus:text-ink focus:font-bold focus:rounded-md focus:shadow-lg focus:outline-none"
+        >
+          Skip to main content
+        </a>
 
-      {/* ============ HERO SECTION ============ */}
-      <header className="hero relative overflow-hidden py-8 sm:py-14 md:py-20 lg:py-24" id="top">
+        {/* ============ NAVIGATION ============ */}
+        <Navbar />
+
+        {/* ============ MAIN CONTENT CONTAINER ============ */}
+        <main id="main-content">
+          {/* ============ HERO SECTION ============ */}
+          <header className="hero relative overflow-hidden py-8 sm:py-14 md:py-20 lg:py-24" id="top">
         {/* Aesthetic background glow effect */}
         <div className="absolute top-[-220px] right-[-180px] w-[560px] h-[560px] rounded-full bg-gradient-to-br from-marigold/10 to-transparent pointer-events-none blur-3xl" />
         
@@ -852,60 +898,131 @@ export default function App() {
             </button>
           </motion.div>
 
-          {/* Copyable Invite link widget */}
+          {/* Copyable Invite link & In-Person QR Code widget */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-16 max-w-2xl mx-auto bg-card border border-border-custom rounded-custom p-6 sm:p-8 text-center relative overflow-hidden shadow-sm hover:shadow-custom-sm transition-all"
+            className="mt-16 max-w-3xl mx-auto bg-card border border-border-custom rounded-custom p-6 sm:p-8 text-left relative overflow-hidden shadow-sm hover:shadow-custom-sm transition-all"
             id="invite-share-card"
           >
             {/* Subtle background glow */}
-            <div className="absolute -top-10 -right-10 w-36 h-36 bg-marigold/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-peacock/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -top-10 -right-10 w-44 h-44 bg-marigold/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-peacock/10 rounded-full blur-3xl pointer-events-none" />
             
             <div className="relative z-10">
-              <span className="inline-flex items-center gap-1.5 bg-marigold/10 text-marigold-deep dark:text-marigold font-mono text-[0.72rem] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-                <Users className="w-3.5 h-3.5 animate-pulse" /> Invite Friends & Colleagues
-              </span>
-              <h3 className="font-display text-xl sm:text-2xl font-extrabold text-ink mb-2">Know someone who wants to learn coding?</h3>
-              <p className="text-muted text-[0.92rem] leading-relaxed mb-6 max-w-lg mx-auto">
-                Share CodeInIndia with friends, classmates, or colleagues so they can secure their seats in the next batch!
-              </p>
+              <div className="text-center sm:text-left mb-6">
+                <span className="inline-flex items-center gap-1.5 bg-marigold/10 text-marigold-deep dark:text-marigold font-mono text-[0.72rem] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2.5">
+                  <Users className="w-3.5 h-3.5 animate-pulse" /> Invite Friends & Colleagues
+                </span>
+                <h3 className="font-display text-xl sm:text-2xl font-extrabold text-ink mb-1.5">Know someone who wants to learn coding?</h3>
+                <p className="text-muted text-[0.92rem] leading-relaxed max-w-xl">
+                  Share CodeInIndia with friends, classmates, or colleagues so they can reserve their seats in the next live batch!
+                </p>
+              </div>
 
-              <div className="flex flex-col lg:flex-row items-stretch gap-3.5 max-w-2xl mx-auto">
-                <div className="flex-1 bg-paper border border-border-custom px-4 py-2.5 rounded-custom-sm font-mono text-xs text-ink-soft select-all flex items-center justify-between overflow-x-auto whitespace-nowrap min-h-[42px] scrollbar-none">
-                  <span>{inviteUrl}</span>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                {/* Left Side: Copy link & Social Share buttons */}
+                <div className="md:col-span-7 flex flex-col gap-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-ink-soft mb-1.5">
+                      Direct Invite Link
+                    </label>
+                    <div className="bg-paper border border-border-custom px-3.5 py-2.5 rounded-custom-sm font-mono text-xs text-ink-soft select-all flex items-center justify-between overflow-x-auto whitespace-nowrap min-h-[42px] scrollbar-none shadow-2xs">
+                      <span>{inviteUrl}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2.5 pt-1">
+                    <button
+                      onClick={handleCopyInvite}
+                      className="btn btn-primary font-semibold py-2.5 px-4 flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer whitespace-nowrap flex-1"
+                      id="copy-invite-link-btn"
+                      type="button"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-4 h-4 text-white" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4 text-white" />
+                          <span>Copy Link</span>
+                        </>
+                      )}
+                    </button>
+                    
+                    <a
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hey! Check out CodeInIndia — live hands-on coding cohort to build dynamic websites, SaaS & apps: ${inviteUrl}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn bg-[#25D366] hover:bg-[#1EBE5D] text-white hover:text-white font-semibold py-2.5 px-4 flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer whitespace-nowrap transition-all hover:shadow-md flex-1"
+                      id="share-whatsapp-btn"
+                    >
+                      <MessageCircle className="w-4 h-4 text-white fill-current" />
+                      <span>WhatsApp</span>
+                    </a>
+
+                    <a
+                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(inviteUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn bg-[#0077b5] hover:bg-[#006297] text-white hover:text-white font-semibold py-2.5 px-4 flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer whitespace-nowrap transition-all hover:shadow-md flex-1 sm:flex-none"
+                      id="share-linkedin-btn"
+                    >
+                      <Linkedin className="w-4 h-4 text-white fill-current" />
+                      <span>LinkedIn</span>
+                    </a>
+                  </div>
+
+                  <p className="text-[0.78rem] text-muted flex items-center gap-1.5 pt-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 flex-none" />
+                    <span>Free seat reservation with instant orientation details.</span>
+                  </p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2.5">
-                  <button
-                    onClick={handleCopyInvite}
-                    className="btn btn-primary font-semibold py-2.5 px-5 flex items-center justify-center gap-2 text-sm cursor-pointer whitespace-nowrap flex-1 sm:flex-none"
-                    id="copy-invite-link-btn"
-                    type="button"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-4.5 h-4.5 text-white" />
-                        <span>Copied!</span>
-                      </>
+
+                {/* Right Side: Dynamically Generated In-Person QR Code */}
+                <div className="md:col-span-5 flex flex-col items-center justify-center p-4 rounded-2xl bg-paper/80 dark:bg-[#0B1120]/80 border border-border-custom text-center shadow-2xs relative group">
+                  <div className="flex items-center gap-1.5 mb-2.5 text-ink-soft">
+                    <QrCode className="w-3.5 h-3.5 text-marigold-deep dark:text-marigold" />
+                    <span className="font-mono text-[0.72rem] font-bold uppercase tracking-wider text-ink">
+                      In-Person Mobile Scan
+                    </span>
+                  </div>
+
+                  {/* QR Code Container */}
+                  <div className="relative p-2.5 bg-white rounded-xl shadow-xs border border-slate-200/80 transition-transform group-hover:scale-102">
+                    {isGeneratingQr || !inviteQrCode ? (
+                      <div className="w-36 h-36 flex items-center justify-center bg-slate-100 rounded-lg animate-pulse text-muted text-xs">
+                        Generating QR...
+                      </div>
                     ) : (
-                      <>
-                        <Copy className="w-4.5 h-4.5 text-white" />
-                        <span>Copy Link</span>
-                      </>
+                      <img
+                        src={inviteQrCode}
+                        alt="Dynamic QR Code for CodeInIndia Invite"
+                        className="w-36 h-36 rounded-lg block"
+                        id="invite-qr-code-img"
+                        loading="lazy"
+                      />
                     )}
-                  </button>
-                  <a
-                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(inviteUrl)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn bg-[#0077b5] hover:bg-[#006297] text-white hover:text-white font-semibold py-2.5 px-5 flex items-center justify-center gap-2 text-sm cursor-pointer whitespace-nowrap transition-all hover:shadow-md flex-1 sm:flex-none"
-                    id="share-linkedin-btn"
-                  >
-                    <Linkedin className="w-4.5 h-4.5 text-white fill-current" />
-                    <span>Share on LinkedIn</span>
-                  </a>
+                  </div>
+
+                  <p className="text-[0.72rem] text-muted mt-2.5 leading-tight max-w-[200px]">
+                    Scan with camera or Google Lens to open invite link directly on phone
+                  </p>
+
+                  {inviteQrCode && (
+                    <button
+                      type="button"
+                      onClick={handleDownloadInviteQr}
+                      className="mt-2 text-[0.72rem] font-semibold text-peacock hover:text-peacock/80 dark:text-cyan-400 flex items-center gap-1 cursor-pointer transition-colors py-1 px-2.5 rounded-md hover:bg-paper"
+                      id="download-invite-qr-btn"
+                    >
+                      <Download className="w-3 h-3" />
+                      <span>Download QR</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -1446,6 +1563,7 @@ export default function App() {
           </motion.div>
         </div>
       </section>
+      </main>
 
       {/* ============ FOOTER SECTION ============ */}
       <footer className="bg-ink text-[#8A93B5] pt-14 pb-24 md:pb-12 border-t border-[#233052]" id="app-footer">

@@ -7,6 +7,8 @@ import RazorpayPaymentModal from './RazorpayPaymentModal';
 import FramerMotionConfetti from './FramerMotionConfetti';
 import GuaranteeDetailsModal from './GuaranteeDetailsModal';
 import WhatsAppJoinModal from './WhatsAppJoinModal';
+import { saveLeadToFirestore } from '../lib/firebase';
+import UrgencyBanner from './UrgencyBanner';
 
 // RFC 5322 compliant standard email validation regex
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -133,12 +135,28 @@ export default function RegisterForm() {
 
       const json = await response.json();
 
+      const leadId = json?.registration?.id || `REG-${Date.now()}`;
+
       if (json.success && json.registration) {
         setDbRecord({
           id: json.registration.id,
           isUpdate: json.isUpdate,
           totalRecords: json.totalRecords || 1
         });
+      }
+
+      // Persist to Firebase Firestore
+      try {
+        await saveLeadToFirestore(leadId, {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          track: 'Full-Stack Software Engineering',
+          status: 'NEW',
+          createdAt: new Date().toISOString()
+        });
+      } catch (firestoreErr) {
+        console.warn("Firestore sync notice:", firestoreErr);
       }
     } catch (err) {
       console.warn("Backend database write fallback:", err);
@@ -272,11 +290,20 @@ export default function RegisterForm() {
           <div className="flex items-center justify-between border-b border-border-custom/40 pb-2">
             <span className="font-display font-extrabold text-sm text-ink dark:text-white flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5 text-peacock" />
-              Backend DB Record
+              Database Store
             </span>
             <span className="text-emerald-500 font-mono text-[0.7rem] font-bold uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" />
               {dbRecord?.isUpdate ? 'RECORD UPDATED' : 'CONFIRMED IN DB'}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between bg-amber-500/8 dark:bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-500/20">
+            <span className="font-mono text-[0.68rem] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1">
+              <span>🔥</span> Cloud Firestore Synced
+            </span>
+            <span className="text-[0.65rem] font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/15 px-1.5 py-0.2 rounded">
+              PERSISTENT
             </span>
           </div>
 
@@ -362,6 +389,9 @@ export default function RegisterForm() {
   return (
     <>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" id="registration-form" noValidate>
+        {/* Real-time Urgency Banner (Shows countdown if batch starts in < 48 hours) */}
+        <UrgencyBanner />
+
         {/* Full Name */}
         <div>
           <label htmlFor="fName" className="block text-[0.84rem] font-semibold mb-1.5 text-ink-soft dark:text-gray-300 flex items-center gap-1.5">

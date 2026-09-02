@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, CreditCard, ShieldCheck, AlertCircle, Loader2, Lock, ArrowRight } from 'lucide-react';
 import { openRazorpayCheckout, RazorpayVerificationResponse } from '../utils/razorpay';
 import PaymentSuccessModal, { PaymentSuccessData } from './PaymentSuccessModal';
+import { savePaymentToFirestore } from '../lib/firebase';
 
 interface RazorpayPaymentModalProps {
   isOpen: boolean;
@@ -140,6 +141,23 @@ export default function RazorpayPaymentModal({
 
         setPaymentSuccessData(successData);
         setIsSuccessModalOpen(true);
+
+        // Persist payment to Firebase Firestore
+        if (verifyResponse.payment_id) {
+          savePaymentToFirestore(verifyResponse.payment_id, {
+            paymentId: verifyResponse.payment_id,
+            orderId: verifyResponse.order_id,
+            amount: currentPlan.amount,
+            currency: 'INR',
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
+            name: formData.name.trim(),
+            status: 'SUCCESS',
+            createdAt: new Date().toISOString()
+          }).catch(err => {
+            console.warn('Firestore payment save notice:', err);
+          });
+        }
 
         if (onPaymentVerified) {
           onPaymentVerified(verifyResponse);

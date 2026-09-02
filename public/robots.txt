@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /admin/*
+
+# Host
+Host: https://codeinindia.in
+
+# Sitemaps
+Sitemap: https://codeinindia.in/sitemap.xml

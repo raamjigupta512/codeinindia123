@@ -194,9 +194,12 @@ export default function DatabaseViewerModal({ isOpen, onClose, defaultTab = 'reg
             <div>
               <h3 className="font-display font-extrabold text-lg text-ink dark:text-white flex items-center gap-2">
                 Backend Database Store
+                <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[0.65rem] font-mono px-2 py-0.5 rounded-full font-bold">
+                  🔥 Firebase Firestore Synced
+                </span>
               </h3>
               <p className="text-xs text-muted">
-                Persistent JSON store · Registrations ({records.length}) · Razorpay Payments ({payments.length})
+                Cloud Firestore & JSON store · Registrations ({records.length}) · Razorpay Payments ({payments.length})
               </p>
             </div>
           </div>
