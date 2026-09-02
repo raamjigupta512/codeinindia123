@@ -39,6 +39,7 @@ export default function Navbar() {
     { label: "What you'll build", href: "#build" },
     { label: "Curriculum", href: "#curriculum" },
     { label: "Outcomes", href: "#student-outcomes-sec" },
+    { label: "Certificates", href: "#certificates" },
     { label: "Pricing", href: "#pricing" },
     { label: "FAQ", href: "#faq" },
   ];

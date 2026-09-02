@@ -133,6 +133,58 @@
         }
       },
       "required": ["userId", "activeWeek", "completedLessonIds", "progressPercent", "lastUpdated"]
+    },
+    "ParticipationCertificate": {
+      "title": "ParticipationCertificate",
+      "description": "Official CodeInIndia AI Workshop Participation Certificate records",
+      "type": "object",
+      "properties": {
+        "certificateId": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "fullName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 200
+        },
+        "mobile": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "workshopName": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "workshopDate": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "city": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "whatsappNumber": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "issueDate": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "status": {
+          "type": "string",
+          "enum": ["GENERATED", "APPROVED", "PENDING", "REJECTED", "REVOKED", "ACTIVE", "VALID"]
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": ["certificateId", "fullName", "email", "mobile", "workshopName", "workshopDate", "city", "status", "createdAt"]
     }
   },
   "firestore": {
@@ -159,6 +211,12 @@
         "$ref": "#/entities/CurriculumProgress"
       },
       "description": "Curriculum progress tracking documents"
+    },
+    "/certificates/{certificateId}": {
+      "schema": {
+        "$ref": "#/entities/ParticipationCertificate"
+      },
+      "description": "Verified participation & course completion certificates registry"
     }
   }
 }

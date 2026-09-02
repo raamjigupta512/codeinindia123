@@ -43,6 +43,7 @@ import InteractiveRoadmap from './components/InteractiveRoadmap';
 import SkillsAcquiredChart from './components/SkillsAcquiredChart';
 import CurriculumProgressBar from './components/CurriculumProgressBar';
 import CertificatePreview from './components/CertificatePreview';
+import ParticipationCertificateSection from './components/ParticipationCertificateSection';
 import StudentOutcomes from './components/StudentOutcomes';
 import BackToTop from './components/BackToTop';
 import TimeToShipCounter from './components/TimeToShipCounter';
@@ -54,6 +55,7 @@ import GuaranteeAlertToast from './components/GuaranteeAlertToast';
 import RazorpayPaymentModal from './components/RazorpayPaymentModal';
 import GuaranteeDetailsModal from './components/GuaranteeDetailsModal';
 import StudentDashboard from './components/StudentDashboard';
+import FloatingCommunityButton from './components/FloatingCommunityButton';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { PublicCertificateVerify } from './components/public/PublicCertificateVerify';
@@ -66,6 +68,7 @@ import {
 } from './types';
 import { getWhatsappNumber } from './lib/whatsapp';
 import { getUpcomingBatchSchedule } from './lib/schedule';
+import { injectOpenGraphMeta } from './lib/meta';
 import { detectUserIntent, PERSONA_INTENTS, PersonaIntent } from './utils/intentDetection';
 
 export default function App() {
@@ -149,6 +152,8 @@ export default function App() {
       const sched = getUpcomingBatchSchedule();
       setBatchSchedule(sched);
       setLocalShortDate(sched.combinedShortDates);
+      // Dynamically inject & sync Open Graph meta tags into document head
+      injectOpenGraphMeta({ schedule: sched });
     } catch (e) {
       console.error("Error calculating batch schedule", e);
     }
@@ -742,6 +747,9 @@ export default function App() {
 
       {/* ============ VERIFIED CERTIFICATE PREVIEW SECTION ============ */}
       <CertificatePreview />
+
+      {/* ============ PARTICIPATION CERTIFICATE REQUEST & VERIFICATION SECTION ============ */}
+      <ParticipationCertificateSection />
 
       {/* ============ STUDENT OUTCOMES & PLACEMENT BAR CHART ============ */}
       <StudentOutcomes />
@@ -1680,6 +1688,9 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* ============ FLOATING JOIN COMMUNITY BUTTON ============ */}
+      <FloatingCommunityButton />
 
       {/* ============ FLOATING WHATSAPP BUTTON ============ */}
       <a 

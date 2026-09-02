@@ -185,20 +185,55 @@ export interface Course {
   modules: CourseModule[];
 }
 
+export type CertificateType = 'PARTICIPATION' | 'COMPLETION';
+export type CertificateStatus = 'ACTIVE' | 'REVOKED' | 'VALID' | 'PENDING' | 'REJECTED' | 'GENERATED';
+
 export interface Certificate {
-  id: string; // CERT-CI-2026-XXXX
-  studentId: string;
+  id: string; // CERT-CI-2026-XXXX or CII-WS-2026-XXXX or CII-PART-2026-XXXX
+  type?: CertificateType;
+  studentId?: string;
   studentName: string;
+  participantName?: string; // alias for studentName
   studentEmail: string;
-  enrollmentId: string;
-  courseId: string;
-  courseName: string;
+  mobile?: string;
+  whatsappNumber?: string;
+  city?: string;
+  enrollmentId?: string;
+  courseId?: string;
+  courseName?: string;
+  workshopName?: string;
+  workshopDate?: string;
   issueDate: string;
   issuedAt?: string; // alias for issueDate
-  status: 'ACTIVE' | 'REVOKED' | 'VALID';
+  status: CertificateStatus;
   credentialUrl: string;
   verificationUrl?: string; // alias for credentialUrl
-  skills: string[];
+  skills?: string[];
+  rejectionReason?: string;
+  emailSentAt?: string;
+  emailDeliveryStatus?: 'PENDING' | 'SENT' | 'FAILED';
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ParticipationCertificateRequest {
+  id: string; // REQ-2026-XXXX
+  certificateId: string; // CII-PART-2026-XXXX
+  fullName: string;
+  email: string;
+  mobile: string;
+  workshopName: string;
+  workshopDate: string;
+  city: string;
+  whatsappNumber: string;
+  confirmed: boolean;
+  status: 'GENERATED' | 'APPROVED' | 'PENDING' | 'REJECTED' | 'REVOKED';
+  issueDate: string;
+  rejectionReason?: string;
+  emailSentAt?: string;
+  emailDeliveryStatus?: 'PENDING' | 'SENT' | 'FAILED';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Referral {

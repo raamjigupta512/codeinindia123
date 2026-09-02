@@ -2,7 +2,11 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary';
+import { injectOpenGraphMeta } from './lib/meta';
 import './index.css';
+
+// Immediately inject real-time dynamic Open Graph & social preview meta tags
+injectOpenGraphMeta();
 
 // Guard against external browser extension injection errors (e.g. MetaMask, WalletConnect, disconnected background ports)
 if (typeof window !== 'undefined') {

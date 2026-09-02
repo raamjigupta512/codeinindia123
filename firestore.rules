@@ -101,5 +101,28 @@ service cloud.firestore {
       allow create, update: if isValidId(progressId) && isValidCurriculumProgress(incoming());
       allow delete: if isSignedIn();
     }
+
+    // Certificates (Public verification & Admin management)
+    function isValidCertificate(data) {
+      return data.certificateId is string && data.certificateId.size() > 0 && data.certificateId.size() <= 100 &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
+             data.mobile is string && data.mobile.size() > 0 && data.mobile.size() <= 20 &&
+             data.workshopName is string && data.workshopName.size() <= 150 &&
+             data.workshopDate is string && data.workshopDate.size() <= 50 &&
+             data.city is string && data.city.size() <= 100 &&
+             data.status in ['GENERATED', 'APPROVED', 'PENDING', 'REJECTED', 'REVOKED', 'ACTIVE', 'VALID'] &&
+             data.createdAt is string && data.createdAt.size() <= 60;
+    }
+
+    match /certificates/{certificateId} {
+      allow get: if true;
+      allow list: if isSignedIn();
+      allow create: if isValidId(certificateId) && isValidCertificate(incoming());
+      allow update: if isSignedIn() && isValidCertificate(incoming()) &&
+                    incoming().certificateId == existing().certificateId &&
+                    incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn();
+    }
   }
 }

@@ -9,6 +9,7 @@ import {
   Workshop, 
   Course, 
   Certificate, 
+  ParticipationCertificateRequest,
   Referral, 
   AuditLog, 
   CommunicationLog,
@@ -27,6 +28,7 @@ const FILES = {
   WORKSHOPS: path.join(DATA_DIR, 'workshops.json'),
   COURSES: path.join(DATA_DIR, 'courses.json'),
   CERTIFICATES: path.join(DATA_DIR, 'certificates.json'),
+  CERTIFICATE_REQUESTS: path.join(DATA_DIR, 'certificate_requests.json'),
   REFERRALS: path.join(DATA_DIR, 'referrals.json'),
   AUDIT_LOGS: path.join(DATA_DIR, 'audit_logs.json'),
   COMMUNICATIONS: path.join(DATA_DIR, 'communications.json'),
@@ -666,17 +668,98 @@ const INITIAL_PAYMENTS: AdminPaymentRecord[] = [
 
 const INITIAL_CERTIFICATES: Certificate[] = [
   {
+    id: 'CII-PART-2026-894210',
+    type: 'PARTICIPATION',
+    studentName: 'Aarav Sharma',
+    participantName: 'Aarav Sharma',
+    studentEmail: 'aarav.sharma@example.com',
+    mobile: '9876543210',
+    whatsappNumber: '9876543210',
+    city: 'Bengaluru',
+    workshopName: 'Free Live AI Coding & App Building Masterclass',
+    workshopDate: '2026-02-20',
+    issueDate: '2026-02-20T20:30:00.000Z',
+    status: 'ACTIVE',
+    credentialUrl: 'https://codeinindia.com/verify/CII-PART-2026-894210',
+    verificationUrl: '#verify/CII-PART-2026-894210',
+    skills: ['AI Assisted Coding', 'Prompt Architecture', 'Dynamic Web Apps', 'Google GenAI SDK'],
+    createdAt: '2026-02-20T20:30:00.000Z'
+  },
+  {
+    id: 'CII-PART-2026-773194',
+    type: 'PARTICIPATION',
+    studentName: 'Kavya Nair',
+    participantName: 'Kavya Nair',
+    studentEmail: 'kavya.nair@example.com',
+    mobile: '9845112233',
+    whatsappNumber: '9845112233',
+    city: 'Kochi',
+    workshopName: 'Weekend 2-Day Micro-SaaS Sprint',
+    workshopDate: '2026-02-22',
+    issueDate: '2026-02-22T17:00:00.000Z',
+    status: 'ACTIVE',
+    credentialUrl: 'https://codeinindia.com/verify/CII-PART-2026-773194',
+    verificationUrl: '#verify/CII-PART-2026-773194',
+    skills: ['Micro-SaaS Architecture', 'Razorpay Webhooks', 'Next.js 15', 'Full-Stack Deployment'],
+    createdAt: '2026-02-22T17:00:00.000Z'
+  },
+  {
     id: 'CERT-CI-2026-0001',
+    type: 'COMPLETION',
     studentId: 'STU-2026-00102',
     studentName: 'Priya Patel',
+    participantName: 'Priya Patel',
     studentEmail: 'priya.p@example.com',
     enrollmentId: 'CI-2026-000002',
     courseId: 'crs-cohort-4w',
     courseName: 'Full-Stack 4-Week Live Cohort (Hindi + English)',
+    workshopName: 'Full-Stack 4-Week Live Cohort (Hindi + English)',
+    workshopDate: '2026-02-15',
     issueDate: '2026-02-15T12:00:00.000Z',
     status: 'ACTIVE',
     credentialUrl: 'https://codeinindia.com/verify/CERT-CI-2026-0001',
-    skills: ['Next.js 15', 'React 19', 'PostgreSQL', 'Razorpay Webhooks', 'TypeScript', 'Flutter Mobile']
+    verificationUrl: '#verify/CERT-CI-2026-0001',
+    skills: ['Next.js 15', 'React 19', 'PostgreSQL', 'Razorpay Webhooks', 'TypeScript', 'Flutter Mobile'],
+    createdAt: '2026-02-15T12:00:00.000Z'
+  }
+];
+
+const INITIAL_CERTIFICATE_REQUESTS: ParticipationCertificateRequest[] = [
+  {
+    id: 'REQ-2026-0001',
+    certificateId: 'CII-PART-2026-894210',
+    fullName: 'Aarav Sharma',
+    email: 'aarav.sharma@example.com',
+    mobile: '9876543210',
+    workshopName: 'Free Live AI Coding & App Building Masterclass',
+    workshopDate: '2026-02-20',
+    city: 'Bengaluru',
+    whatsappNumber: '9876543210',
+    confirmed: true,
+    status: 'GENERATED',
+    issueDate: '2026-02-20T20:30:00.000Z',
+    emailSentAt: '2026-02-20T20:31:00.000Z',
+    emailDeliveryStatus: 'SENT',
+    createdAt: '2026-02-20T20:30:00.000Z',
+    updatedAt: '2026-02-20T20:31:00.000Z'
+  },
+  {
+    id: 'REQ-2026-0002',
+    certificateId: 'CII-PART-2026-773194',
+    fullName: 'Kavya Nair',
+    email: 'kavya.nair@example.com',
+    mobile: '9845112233',
+    workshopName: 'Weekend 2-Day Micro-SaaS Sprint',
+    workshopDate: '2026-02-22',
+    city: 'Kochi',
+    whatsappNumber: '9845112233',
+    confirmed: true,
+    status: 'GENERATED',
+    issueDate: '2026-02-22T17:00:00.000Z',
+    emailSentAt: '2026-02-22T17:01:00.000Z',
+    emailDeliveryStatus: 'SENT',
+    createdAt: '2026-02-22T17:00:00.000Z',
+    updatedAt: '2026-02-22T17:01:00.000Z'
   }
 ];
 
@@ -902,6 +985,179 @@ export class AdminStore {
 
   static saveCertificates(data: Certificate[]) {
     writeJson(FILES.CERTIFICATES, data);
+  }
+
+  // Certificate Requests
+  static getCertificateRequests(): ParticipationCertificateRequest[] {
+    return readJson(FILES.CERTIFICATE_REQUESTS, INITIAL_CERTIFICATE_REQUESTS);
+  }
+
+  static saveCertificateRequests(data: ParticipationCertificateRequest[]) {
+    writeJson(FILES.CERTIFICATE_REQUESTS, data);
+  }
+
+  // Submit and Auto-generate Participation Certificate
+  static createParticipationCertificate(params: {
+    fullName: string;
+    email: string;
+    mobile: string;
+    workshopName: string;
+    workshopDate: string;
+    city: string;
+    whatsappNumber: string;
+    confirmed: boolean;
+  }): { request: ParticipationCertificateRequest; certificate: Certificate } {
+    const certId = `CII-PART-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+    const reqId = `REQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const nowIso = new Date().toISOString();
+
+    const newCert: Certificate = {
+      id: certId,
+      type: 'PARTICIPATION',
+      studentName: params.fullName.trim(),
+      participantName: params.fullName.trim(),
+      studentEmail: params.email.trim().toLowerCase(),
+      mobile: params.mobile.trim(),
+      whatsappNumber: params.whatsappNumber.trim(),
+      city: params.city.trim(),
+      workshopName: params.workshopName.trim(),
+      workshopDate: params.workshopDate.trim(),
+      issueDate: nowIso,
+      issuedAt: nowIso,
+      status: 'ACTIVE',
+      credentialUrl: `https://codeinindia.com/verify/${certId}`,
+      verificationUrl: `#verify/${certId}`,
+      skills: ['AI Coding & Architecture', 'Prompt Engineering', 'Full-Stack Software Building'],
+      emailDeliveryStatus: 'SENT',
+      emailSentAt: nowIso,
+      createdAt: nowIso,
+      updatedAt: nowIso
+    };
+
+    const newReq: ParticipationCertificateRequest = {
+      id: reqId,
+      certificateId: certId,
+      fullName: params.fullName.trim(),
+      email: params.email.trim().toLowerCase(),
+      mobile: params.mobile.trim(),
+      workshopName: params.workshopName.trim(),
+      workshopDate: params.workshopDate.trim(),
+      city: params.city.trim(),
+      whatsappNumber: params.whatsappNumber.trim(),
+      confirmed: Boolean(params.confirmed),
+      status: 'GENERATED',
+      issueDate: nowIso,
+      emailSentAt: nowIso,
+      emailDeliveryStatus: 'SENT',
+      createdAt: nowIso,
+      updatedAt: nowIso
+    };
+
+    // Save certificate
+    const certs = this.getCertificates();
+    certs.unshift(newCert);
+    this.saveCertificates(certs);
+
+    // Save request
+    const reqs = this.getCertificateRequests();
+    reqs.unshift(newReq);
+    this.saveCertificateRequests(reqs);
+
+    // Log communication & audit
+    this.logCommunication({
+      recipientType: 'STUDENT',
+      recipientEmail: params.email.trim().toLowerCase(),
+      recipientPhone: params.mobile.trim(),
+      channel: 'EMAIL',
+      templateId: 'tpl_participation_cert_issued',
+      subject: `Your CodeInIndia Participation Certificate: ${certId}`,
+      status: 'DELIVERED',
+      adminName: 'SYSTEM_AUTOMATION'
+    });
+
+    this.addAuditLog({
+      adminName: 'SYSTEM (Certificate Engine)',
+      adminEmail: 'certificate@codeinindia.in',
+      adminRole: 'SUPER_ADMIN',
+      action: 'PARTICIPATION_CERTIFICATE_GENERATED',
+      targetType: 'CERTIFICATE',
+      targetId: certId,
+      targetName: params.fullName.trim(),
+      newValue: `Generated for workshop ${params.workshopName} (${params.workshopDate})`
+    });
+
+    return { request: newReq, certificate: newCert };
+  }
+
+  // Approve Request
+  static approveCertificateRequest(requestId: string, adminName: string) {
+    const reqs = this.getCertificateRequests();
+    const idx = reqs.findIndex(r => r.id === requestId);
+    if (idx === -1) return null;
+
+    const req = reqs[idx];
+    req.status = 'APPROVED';
+    req.updatedAt = new Date().toISOString();
+    this.saveCertificateRequests(reqs);
+
+    const certs = this.getCertificates();
+    const cIdx = certs.findIndex(c => c.id === req.certificateId);
+    if (cIdx >= 0) {
+      certs[cIdx].status = 'ACTIVE';
+      certs[cIdx].updatedAt = new Date().toISOString();
+      this.saveCertificates(certs);
+    }
+
+    return { request: req, certificate: cIdx >= 0 ? certs[cIdx] : null };
+  }
+
+  // Reject Request
+  static rejectCertificateRequest(requestId: string, reason: string, adminName: string) {
+    const reqs = this.getCertificateRequests();
+    const idx = reqs.findIndex(r => r.id === requestId);
+    if (idx === -1) return null;
+
+    const req = reqs[idx];
+    req.status = 'REJECTED';
+    req.rejectionReason = reason;
+    req.updatedAt = new Date().toISOString();
+    this.saveCertificateRequests(reqs);
+
+    const certs = this.getCertificates();
+    const cIdx = certs.findIndex(c => c.id === req.certificateId);
+    if (cIdx >= 0) {
+      certs[cIdx].status = 'REJECTED';
+      certs[cIdx].rejectionReason = reason;
+      certs[cIdx].updatedAt = new Date().toISOString();
+      this.saveCertificates(certs);
+    }
+
+    return req;
+  }
+
+  // Revoke Certificate
+  static revokeCertificateRecord(certId: string, reason: string, adminName: string) {
+    const certs = this.getCertificates();
+    const idx = certs.findIndex(c => c.id.toLowerCase() === certId.trim().toLowerCase());
+    if (idx === -1) return null;
+
+    const cert = certs[idx];
+    cert.status = 'REVOKED';
+    cert.rejectionReason = reason;
+    cert.updatedAt = new Date().toISOString();
+    this.saveCertificates(certs);
+
+    // Also update matching request if exists
+    const reqs = this.getCertificateRequests();
+    const rIdx = reqs.findIndex(r => r.certificateId.toLowerCase() === certId.trim().toLowerCase());
+    if (rIdx >= 0) {
+      reqs[rIdx].status = 'REVOKED';
+      reqs[rIdx].rejectionReason = reason;
+      reqs[rIdx].updatedAt = new Date().toISOString();
+      this.saveCertificateRequests(reqs);
+    }
+
+    return cert;
   }
 
   // Referrals

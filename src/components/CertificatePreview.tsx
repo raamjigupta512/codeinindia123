@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Award, 
   Sparkles, 
@@ -11,17 +11,29 @@ import {
   User, 
   FileText,
   Copy,
-  Check
+  Check,
+  Search,
+  Key
 } from 'lucide-react';
+import ShareCertificateModal from './ShareCertificateModal';
 
 export default function CertificatePreview() {
   const [studentName, setStudentName] = useState('Aarav Sharma');
   const [track, setTrack] = useState('Full-Stack Software Engineering');
+  const [customCertId, setCustomCertId] = useState('');
   const [copied, setCopied] = useState(false);
+  const [glowKey, setGlowKey] = useState(0);
 
-  const certId = `CII-2026-${Math.abs(
+  const calculatedCertId = `CII-2026-${Math.abs(
     studentName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 108)
   ).toString().padStart(6, '0')}`;
+
+  const certId = customCertId.trim() || calculatedCertId;
+
+  // Trigger glowing pulse whenever student name, ID or track changes
+  useEffect(() => {
+    setGlowKey(prev => prev + 1);
+  }, [studentName, track, customCertId]);
 
   const currentDate = new Date().toLocaleDateString('en-US', {
     month: 'long',
@@ -43,37 +55,69 @@ export default function CertificatePreview() {
   return (
     <section className="py-20 md:py-24 bg-card border-t border-border-custom relative overflow-hidden" id="certificate-preview">
       {/* Background ambient lighting */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/10 dark:bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="wrap relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="eyebrow-line">Verified Credentials</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold uppercase tracking-wider mb-4">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Verifiable Accreditation</span>
+          </div>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold text-ink dark:text-white mb-4 mt-1">
             Earn Your Verified Certificate
           </h2>
           <p className="text-muted text-sm md:text-base leading-relaxed">
-            Type your name below to instantly generate a live preview of the verifiable credential you will receive upon completing CodeInIndia.
+            Type your student name or Certificate ID below to trigger live generation with cryptographic security and real-time verification status.
           </p>
         </div>
 
         {/* Input & Customization Panel */}
-        <div className="max-w-xl mx-auto mb-10 bg-paper dark:bg-[#141B2D] border border-border-custom dark:border-[#222C44] rounded-2xl p-5 md:p-6 shadow-sm">
+        <div className="max-w-2xl mx-auto mb-10 bg-paper dark:bg-[#141B2D] border border-border-custom dark:border-[#222C44] rounded-3xl p-5 md:p-7 shadow-lg">
           <div className="space-y-4">
-            <div>
-              <label htmlFor="student-name-input" className="block text-xs font-mono font-bold uppercase text-muted dark:text-[#8A93B5] mb-2 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-peacock" />
-                Enter Student Full Name:
-              </label>
-              <input
-                id="student-name-input"
-                type="text"
-                value={studentName}
-                onChange={(e) => setStudentName(e.target.value)}
-                placeholder="e.g. Aarav Sharma"
-                maxLength={36}
-                className="w-full bg-card dark:bg-[#1C263F] border border-border-custom dark:border-[#2E3C66] rounded-xl px-4 py-2.5 text-ink dark:text-white font-medium text-base focus:outline-none focus:border-peacock focus:ring-2 focus:ring-peacock/20 transition-all"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="student-name-input" className="block text-xs font-mono font-bold uppercase text-muted dark:text-[#8A93B5] mb-2 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-peacock" />
+                  Student Full Name:
+                </label>
+                <input
+                  id="student-name-input"
+                  type="text"
+                  value={studentName}
+                  onChange={(e) => setStudentName(e.target.value)}
+                  placeholder="e.g. Aarav Sharma"
+                  maxLength={36}
+                  className="w-full bg-card dark:bg-[#1C263F] border border-border-custom dark:border-[#2E3C66] rounded-xl px-4 py-2.5 text-ink dark:text-white font-medium text-sm sm:text-base focus:outline-none focus:border-peacock focus:ring-2 focus:ring-peacock/20 transition-all"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="custom-cert-id-input" className="block text-xs font-mono font-bold uppercase text-muted dark:text-[#8A93B5] mb-2 flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-amber-500" />
+                  Certificate ID (or auto-hash):
+                </label>
+                <div className="relative">
+                  <input
+                    id="custom-cert-id-input"
+                    type="text"
+                    value={customCertId}
+                    onChange={(e) => setCustomCertId(e.target.value)}
+                    placeholder={calculatedCertId}
+                    className="w-full bg-card dark:bg-[#1C263F] border border-border-custom dark:border-[#2E3C66] rounded-xl px-4 py-2.5 text-amber-600 dark:text-amber-400 font-mono font-semibold text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
+                  />
+                  {customCertId && (
+                    <button
+                      type="button"
+                      onClick={() => setCustomCertId('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted hover:text-ink dark:hover:text-white font-mono bg-paper dark:bg-card px-1.5 py-0.5 rounded border border-border-custom"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div>
@@ -95,19 +139,54 @@ export default function CertificatePreview() {
           </div>
         </div>
 
-        {/* Certificate Rendering Container */}
-        <div className="max-w-4xl mx-auto">
+        {/* Certificate Rendering Container with Slide-In & Glowing Pulse */}
+        <div className="max-w-4xl mx-auto relative">
+          
+          {/* Animated Glow Halo that pulses when participant inputs details */}
+          <motion.div
+            key={`glow-${glowKey}`}
+            initial={{ opacity: 0.8, scale: 0.98 }}
+            animate={{ 
+              opacity: [0.8, 1, 0.5, 0.8],
+              scale: [0.98, 1.02, 1, 1.01]
+            }}
+            transition={{ duration: 1.8, ease: "easeInOut" }}
+            className="absolute -inset-3 bg-gradient-to-r from-amber-400/40 via-amber-500/50 to-amber-300/40 dark:from-amber-500/30 dark:via-amber-400/40 dark:to-amber-600/30 rounded-[2.5rem] blur-xl pointer-events-none z-0"
+          />
+
           <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
-            className="print:shadow-none print:m-0 print:border-none print:p-0"
+            key={`cert-slide-${glowKey}`}
+            initial={{ opacity: 0, y: 28, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ 
+              type: 'spring',
+              stiffness: 220,
+              damping: 24
+            }}
+            className="relative z-10 print:shadow-none print:m-0 print:border-none print:p-0"
           >
-            {/* Certificate Outer Frame with Gold Foil Styling */}
-            <div className="bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 dark:from-amber-500/40 dark:via-amber-600/30 dark:to-amber-700/40 p-2.5 sm:p-4 rounded-3xl shadow-xl relative overflow-hidden select-none">
+            {/* Certificate Outer Frame with Animated Gold Foil Glow Styling */}
+            <motion.div 
+              animate={{
+                boxShadow: [
+                  "0 10px 30px -10px rgba(245, 158, 11, 0.2)",
+                  "0 0 50px 8px rgba(245, 158, 11, 0.45)",
+                  "0 15px 35px -5px rgba(245, 158, 11, 0.25)"
+                ]
+              }}
+              transition={{ duration: 1.6, ease: "easeOut" }}
+              className="bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 dark:from-amber-500/50 dark:via-amber-600/40 dark:to-amber-700/50 p-2.5 sm:p-4 rounded-3xl relative overflow-hidden select-none"
+            >
+              {/* Shimmer light beam effect sweeping across the certificate */}
+              <motion.div
+                initial={{ x: '-100%' }}
+                animate={{ x: '200%' }}
+                transition={{ duration: 1.4, ease: "easeInOut" }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 pointer-events-none z-20"
+              />
               
               {/* Inner White Parchment Paper Canvas */}
-              <div className="bg-white dark:bg-[#0D121F] border-2 border-amber-300 dark:border-amber-500/40 rounded-2xl p-6 sm:p-10 md:p-12 text-center relative overflow-hidden text-slate-800 dark:text-slate-100">
+              <div className="bg-white dark:bg-[#0D121F] border-2 border-amber-300 dark:border-amber-500/40 rounded-2xl p-6 sm:p-10 md:p-12 text-center relative overflow-hidden text-slate-800 dark:text-slate-100 shadow-inner">
                 
                 {/* Background Watermark Crest */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.04] pointer-events-none">
@@ -122,9 +201,13 @@ export default function CertificatePreview() {
 
                 {/* Header Crest Logo */}
                 <div className="flex flex-col items-center justify-center mb-4">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3 shadow-inner">
+                  <motion.div 
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 1.2 }}
+                    className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3 shadow-inner"
+                  >
                     <Award className="w-8 h-8" />
-                  </div>
+                  </motion.div>
                   <span className="font-mono text-xs font-extrabold uppercase tracking-[0.25em] text-amber-700 dark:text-amber-400">
                     CODE IN INDIA · ACADEMY
                   </span>
@@ -145,9 +228,15 @@ export default function CertificatePreview() {
 
                 {/* Dynamic Student Name */}
                 <div className="my-3 py-2 border-b-2 border-amber-400/40 max-w-md mx-auto">
-                  <span className="font-serif text-2xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-amber-300 tracking-wide block capitalize min-h-[1.3em]">
+                  <motion.span 
+                    key={studentName}
+                    initial={{ opacity: 0.6, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="font-serif text-2xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-amber-300 tracking-wide block capitalize min-h-[1.3em]"
+                  >
                     {studentName.trim() || 'Your Name Here'}
-                  </span>
+                  </motion.span>
                 </div>
 
                 {/* Course Completion Details */}
@@ -156,15 +245,26 @@ export default function CertificatePreview() {
                 </p>
 
                 {/* Credential ID & Date Bar */}
-                <div className="flex flex-wrap items-center justify-center gap-4 my-6 py-2 px-4 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl max-w-md mx-auto border border-amber-500/20 text-xs font-mono">
+                <motion.div 
+                  key={certId}
+                  animate={{ 
+                    backgroundColor: [
+                      "rgba(245, 158, 11, 0.08)",
+                      "rgba(245, 158, 11, 0.22)",
+                      "rgba(245, 158, 11, 0.1)"
+                    ] 
+                  }}
+                  transition={{ duration: 0.9 }}
+                  className="flex flex-wrap items-center justify-center gap-4 my-6 py-2 px-4 rounded-xl max-w-md mx-auto border border-amber-500/30 text-xs font-mono shadow-sm"
+                >
                   <span className="text-slate-600 dark:text-slate-300">
                     Issue Date: <strong className="text-slate-900 dark:text-white">{currentDate}</strong>
                   </span>
                   <span className="text-amber-600 dark:text-amber-400 font-bold">|</span>
                   <span className="text-slate-600 dark:text-slate-300">
-                    Credential ID: <strong className="text-amber-700 dark:text-amber-300">{certId}</strong>
+                    Credential ID: <strong className="text-amber-700 dark:text-amber-300 font-bold">{certId}</strong>
                   </span>
-                </div>
+                </motion.div>
 
                 {/* Signatures & Seal Row */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 items-end gap-6 pt-6 border-t border-slate-200 dark:border-slate-800 max-w-2xl mx-auto mt-8">
@@ -181,14 +281,17 @@ export default function CertificatePreview() {
 
                   {/* Official Gold Seal Badge (Center on sm+) */}
                   <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center order-first sm:order-none mb-4 sm:mb-0">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 p-1 shadow-md flex items-center justify-center text-white">
+                    <motion.div 
+                      whileHover={{ scale: 1.08, rotate: 5 }}
+                      className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 p-1 shadow-md flex items-center justify-center text-white cursor-pointer"
+                    >
                       <div className="w-full h-full rounded-full border border-dashed border-white/80 flex flex-col items-center justify-center text-center p-1 bg-amber-600">
                         <ShieldCheck className="w-6 h-6 text-white mb-0.5" />
                         <span className="font-mono text-[0.5rem] font-bold tracking-tighter uppercase leading-none">
                           OFFICIAL
                         </span>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
 
                   {/* Program Director Signature */}
@@ -204,7 +307,7 @@ export default function CertificatePreview() {
                 </div>
 
               </div>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Action Bar: Download Print & Share */}
@@ -216,11 +319,19 @@ export default function CertificatePreview() {
               </span>
             </div>
 
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex flex-wrap items-center gap-3 ml-auto">
+              <ShareCertificateModal 
+                certId={certId}
+                recipientName={studentName || 'Student'}
+                title={track}
+                certType="completion"
+                buttonVariant="secondary"
+              />
+
               <button
                 type="button"
                 onClick={handleCopyVerification}
-                className="btn btn-secondary text-xs font-mono font-semibold py-2 px-3.5 rounded-xl border border-border-custom flex items-center gap-1.5 cursor-pointer"
+                className="btn btn-secondary text-xs font-mono font-semibold py-2 px-3.5 rounded-xl border border-border-custom flex items-center gap-1.5 cursor-pointer hover:border-amber-500/50 transition-colors"
               >
                 {copied ? (
                   <>

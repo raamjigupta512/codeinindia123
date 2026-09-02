@@ -346,8 +346,64 @@ app.get(["/api/config/razorpay", "/api/razorpay-key"], (req, res) => {
   });
 });
 
-// Public: Certificate Verification by Certificate ID
-app.get("/api/public/verify-certificate/:id", (req, res) => {
+// ------------------- PUBLIC PARTICIPATION & COMPLETION CERTIFICATES -------------------
+
+// Public: Submit Participation Certificate Request & Instant Issue
+app.post("/api/certificates/request", (req, res) => {
+  try {
+    const { fullName, email, mobile, workshopName, workshopDate, city, whatsappNumber, confirmed } = req.body;
+
+    // Validate required fields
+    if (!fullName || !fullName.trim()) {
+      return res.status(400).json({ success: false, error: "Full Name is required." });
+    }
+    if (!email || !email.trim() || !email.includes("@")) {
+      return res.status(400).json({ success: false, error: "Valid Email Address is required." });
+    }
+    if (!mobile || !mobile.trim()) {
+      return res.status(400).json({ success: false, error: "Mobile Number is required." });
+    }
+    if (!workshopName || !workshopName.trim()) {
+      return res.status(400).json({ success: false, error: "Workshop Name is required." });
+    }
+    if (!workshopDate || !workshopDate.trim()) {
+      return res.status(400).json({ success: false, error: "Workshop Date is required." });
+    }
+    if (!city || !city.trim()) {
+      return res.status(400).json({ success: false, error: "City is required." });
+    }
+    if (!whatsappNumber || !whatsappNumber.trim()) {
+      return res.status(400).json({ success: false, error: "WhatsApp Number is required." });
+    }
+    if (!confirmed) {
+      return res.status(400).json({ success: false, error: "Please confirm that the information provided is correct." });
+    }
+
+    const { request, certificate } = AdminStore.createParticipationCertificate({
+      fullName: fullName.trim(),
+      email: email.trim().toLowerCase(),
+      mobile: mobile.trim(),
+      workshopName: workshopName.trim(),
+      workshopDate: workshopDate.trim(),
+      city: city.trim(),
+      whatsappNumber: whatsappNumber.trim(),
+      confirmed: Boolean(confirmed)
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Congratulations! Your participation certificate has been generated successfully.",
+      certificate,
+      request
+    });
+  } catch (err: any) {
+    console.error("Error generating participation certificate:", err);
+    return res.status(500).json({ success: false, error: err.message || "Failed to generate certificate" });
+  }
+});
+
+// Public: Certificate Verification by Certificate ID (handles both Course & Participation certs)
+const handleVerifyCertificate = (req: express.Request, res: express.Response) => {
   const { id } = req.params;
   const certificates = AdminStore.getCertificates();
   const cert = certificates.find(c => c.id.toLowerCase() === id.trim().toLowerCase());
@@ -359,17 +415,69 @@ app.get("/api/public/verify-certificate/:id", (req, res) => {
     });
   }
 
+  const isRevoked = cert.status === "REVOKED" || cert.status === "REJECTED";
+
   return res.json({
-    success: true,
+    success: !isRevoked,
+    revoked: isRevoked,
     certificate: {
       id: cert.id,
-      studentName: cert.studentName,
-      courseName: cert.courseName,
-      enrollmentId: cert.enrollmentId,
-      issueDate: cert.issueDate,
+      type: cert.type || (cert.id.startsWith("CII-PART") ? "PARTICIPATION" : "COMPLETION"),
+      studentName: cert.participantName || cert.studentName,
+      participantName: cert.participantName || cert.studentName,
+      courseName: cert.workshopName || cert.courseName || "AI Coding & Engineering Workshop",
+      workshopName: cert.workshopName || cert.courseName || "AI Coding & Engineering Workshop",
+      workshopDate: cert.workshopDate || cert.issueDate?.split("T")[0] || "2026-02-20",
+      enrollmentId: cert.enrollmentId || "CII-VERIFIED",
+      city: cert.city || "India",
+      issueDate: cert.issueDate || cert.issuedAt || new Date().toISOString(),
       status: cert.status,
-      skills: cert.skills || ["Full-Stack Engineering", "Next.js", "React", "Node.js", "AI Assisted Software Building"]
+      rejectionReason: cert.rejectionReason,
+      skills: cert.skills || ["AI Pair Coding", "Next.js", "Full-Stack Software Architecture", "Google GenAI SDK"],
+      credentialUrl: cert.credentialUrl || `https://codeinindia.com/verify/${cert.id}`
     }
+  });
+};
+
+app.get("/api/public/verify-certificate/:id", handleVerifyCertificate);
+app.get("/api/certificates/verify/:id", handleVerifyCertificate);
+app.get("/api/verify-certificate/:id", handleVerifyCertificate);
+
+// Public: Send Certificate to Email
+app.post("/api/certificates/:id/send-email", (req, res) => {
+  const { id } = req.params;
+  const { email } = req.body;
+  const certificates = AdminStore.getCertificates();
+  const cert = certificates.find(c => c.id.toLowerCase() === id.trim().toLowerCase());
+
+  if (!cert) {
+    return res.status(404).json({ success: false, error: "Certificate not found" });
+  }
+
+  const targetEmail = email || cert.studentEmail;
+  if (!targetEmail) {
+    return res.status(400).json({ success: false, error: "Email address is required" });
+  }
+
+  // Update certificate email delivery status
+  cert.emailDeliveryStatus = 'SENT';
+  cert.emailSentAt = new Date().toISOString();
+  AdminStore.saveCertificates(certificates);
+
+  AdminStore.logCommunication({
+    recipientType: 'STUDENT',
+    recipientEmail: targetEmail,
+    recipientPhone: cert.mobile || cert.whatsappNumber,
+    channel: 'EMAIL',
+    templateId: 'tpl_cert_dispatch',
+    subject: `Official CodeInIndia Certificate: ${cert.id}`,
+    status: 'DELIVERED',
+    adminName: 'SYSTEM_AUTOMATION'
+  });
+
+  return res.json({
+    success: true,
+    message: `Certificate ${cert.id} sent successfully to ${targetEmail}`
   });
 });
 
@@ -1660,14 +1768,142 @@ app.get("/api/admin/referrals", authenticateAdmin, (req, res) => {
   res.json({ success: true, data: referrals });
 });
 
-// ------------------- ADMIN CERTIFICATES -------------------
+// ------------------- ADMIN CERTIFICATES & REQUESTS -------------------
 
 app.get("/api/admin/certificates", authenticateAdmin, (req, res) => {
   const certificates = AdminStore.getCertificates();
   res.json({ success: true, data: certificates });
 });
 
-// Issue Certificate for Student
+app.get("/api/admin/certificates/requests", authenticateAdmin, (req, res) => {
+  const requests = AdminStore.getCertificateRequests();
+  res.json({ success: true, data: requests });
+});
+
+// Approve Certificate Request
+app.post("/api/admin/certificates/requests/:id/approve", authenticateAdmin, requireRole(["SUPER_ADMIN", "ADMIN"]), (req: AuthenticatedRequest, res) => {
+  const { id } = req.params;
+  const result = AdminStore.approveCertificateRequest(id, req.admin?.name || "Admin");
+
+  if (!result) {
+    return res.status(404).json({ success: false, error: "Certificate request not found" });
+  }
+
+  AdminStore.addAuditLog({
+    adminName: req.admin.name,
+    adminEmail: req.admin.email,
+    adminRole: req.admin.role,
+    action: "CERTIFICATE_REQUEST_APPROVED",
+    targetType: "CERTIFICATE",
+    targetId: result.request.certificateId,
+    targetName: result.request.fullName,
+    newValue: `Approved certificate request ${id} (${result.request.certificateId})`,
+    ipAddress: req.ip
+  });
+
+  res.json({ success: true, data: result });
+});
+
+// Reject Certificate Request
+app.post("/api/admin/certificates/requests/:id/reject", authenticateAdmin, requireRole(["SUPER_ADMIN", "ADMIN"]), (req: AuthenticatedRequest, res) => {
+  const { id } = req.params;
+  const { reason = "Information mismatch or attendance unverified" } = req.body;
+  const reqRecord = AdminStore.rejectCertificateRequest(id, reason, req.admin?.name || "Admin");
+
+  if (!reqRecord) {
+    return res.status(404).json({ success: false, error: "Certificate request not found" });
+  }
+
+  AdminStore.addAuditLog({
+    adminName: req.admin.name,
+    adminEmail: req.admin.email,
+    adminRole: req.admin.role,
+    action: "CERTIFICATE_REQUEST_REJECTED",
+    targetType: "CERTIFICATE",
+    targetId: reqRecord.certificateId,
+    targetName: reqRecord.fullName,
+    newValue: `Rejected certificate request ${id}. Reason: ${reason}`,
+    ipAddress: req.ip
+  });
+
+  res.json({ success: true, data: reqRecord });
+});
+
+// Generate Certificate (Admin Manual Generation)
+app.post("/api/admin/certificates/generate", authenticateAdmin, requireRole(["SUPER_ADMIN", "ADMIN"]), (req: AuthenticatedRequest, res) => {
+  const { fullName, email, mobile, workshopName, workshopDate, city, whatsappNumber } = req.body;
+
+  if (!fullName || !email || !workshopName) {
+    return res.status(400).json({ success: false, error: "Full name, email, and workshop name are required" });
+  }
+
+  const { request, certificate } = AdminStore.createParticipationCertificate({
+    fullName: fullName.trim(),
+    email: email.trim(),
+    mobile: mobile || "9999999999",
+    workshopName: workshopName.trim(),
+    workshopDate: workshopDate || new Date().toISOString().split("T")[0],
+    city: city || "Online",
+    whatsappNumber: whatsappNumber || mobile || "9999999999",
+    confirmed: true
+  });
+
+  AdminStore.addAuditLog({
+    adminName: req.admin.name,
+    adminEmail: req.admin.email,
+    adminRole: req.admin.role,
+    action: "CERTIFICATE_GENERATED_MANUAL",
+    targetType: "CERTIFICATE",
+    targetId: certificate.id,
+    targetName: fullName,
+    newValue: `Admin manually issued ${certificate.id} for ${workshopName}`,
+    ipAddress: req.ip
+  });
+
+  res.status(201).json({ success: true, certificate, request });
+});
+
+// Resend Certificate Email
+app.post("/api/admin/certificates/:id/resend-email", authenticateAdmin, (req: AuthenticatedRequest, res) => {
+  const { id } = req.params;
+  const certificates = AdminStore.getCertificates();
+  const cert = certificates.find(c => c.id.toLowerCase() === id.trim().toLowerCase());
+
+  if (!cert) {
+    return res.status(404).json({ success: false, error: "Certificate not found" });
+  }
+
+  cert.emailDeliveryStatus = 'SENT';
+  cert.emailSentAt = new Date().toISOString();
+  AdminStore.saveCertificates(certificates);
+
+  AdminStore.logCommunication({
+    recipientType: 'STUDENT',
+    recipientEmail: cert.studentEmail,
+    recipientPhone: cert.mobile || cert.whatsappNumber,
+    channel: 'EMAIL',
+    templateId: 'tpl_cert_dispatch_manual',
+    subject: `[Resent] CodeInIndia Verified Certificate: ${cert.id}`,
+    status: 'DELIVERED',
+    adminName: req.admin?.name || 'Admin'
+  });
+
+  AdminStore.addAuditLog({
+    adminName: req.admin.name,
+    adminEmail: req.admin.email,
+    adminRole: req.admin.role,
+    action: "CERTIFICATE_EMAIL_RESENT",
+    targetType: "CERTIFICATE",
+    targetId: cert.id,
+    targetName: cert.studentName,
+    newValue: `Resent certificate email to ${cert.studentEmail}`,
+    ipAddress: req.ip
+  });
+
+  res.json({ success: true, message: `Certificate email resent to ${cert.studentEmail}` });
+});
+
+// Issue Completion Certificate for Cohort Student
 app.post("/api/admin/certificates/issue", authenticateAdmin, requireRole(["SUPER_ADMIN", "ADMIN"]), (req: AuthenticatedRequest, res) => {
   const { studentId, skills } = req.body;
   const students = AdminStore.getStudents();
@@ -1683,16 +1919,26 @@ app.post("/api/admin/certificates/issue", authenticateAdmin, requireRole(["SUPER
 
   const newCert: Certificate = {
     id: certId,
+    type: "COMPLETION",
     studentId: student.id,
     studentName: student.fullName,
+    participantName: student.fullName,
     studentEmail: student.email,
     enrollmentId: student.enrollmentId || "CI-2026-000000",
     courseId: student.courseId,
     courseName: student.courseName,
+    workshopName: student.courseName,
+    workshopDate: student.registrationDate ? student.registrationDate.split("T")[0] : "2026-02-15",
     issueDate: nowIso,
+    issuedAt: nowIso,
     status: "ACTIVE",
     credentialUrl: `https://codeinindia.com/verify/${certId}`,
-    skills: skills || ["Full-Stack Engineering", "Next.js", "React 19", "PostgreSQL", "Razorpay Webhooks", "TypeScript"]
+    verificationUrl: `#verify/${certId}`,
+    skills: skills || ["Full-Stack Engineering", "Next.js", "React 19", "PostgreSQL", "Razorpay Webhooks", "TypeScript"],
+    emailDeliveryStatus: "SENT",
+    emailSentAt: nowIso,
+    createdAt: nowIso,
+    updatedAt: nowIso
   };
 
   const certificates = AdminStore.getCertificates();
@@ -1720,7 +1966,7 @@ app.post("/api/admin/certificates/issue", authenticateAdmin, requireRole(["SUPER
     targetType: "CERTIFICATE",
     targetId: certId,
     targetName: student.fullName,
-    newValue: `Issued certificate ${certId}`,
+    newValue: `Issued completion certificate ${certId}`,
     ipAddress: req.ip
   });
 
@@ -1730,17 +1976,13 @@ app.post("/api/admin/certificates/issue", authenticateAdmin, requireRole(["SUPER
 // Revoke Certificate
 app.put("/api/admin/certificates/:id/revoke", authenticateAdmin, requireRole(["SUPER_ADMIN"]), (req: AuthenticatedRequest, res) => {
   const { id } = req.params;
-  const { reason } = req.body;
+  const { reason = "Revoked by Super Admin" } = req.body;
 
-  const certificates = AdminStore.getCertificates();
-  const idx = certificates.findIndex(c => c.id === id);
+  const cert = AdminStore.revokeCertificateRecord(id, reason, req.admin?.name || "Admin");
 
-  if (idx === -1) {
+  if (!cert) {
     return res.status(404).json({ success: false, error: "Certificate not found" });
   }
-
-  certificates[idx].status = "REVOKED";
-  AdminStore.saveCertificates(certificates);
 
   AdminStore.addAuditLog({
     adminName: req.admin.name,
@@ -1749,12 +1991,12 @@ app.put("/api/admin/certificates/:id/revoke", authenticateAdmin, requireRole(["S
     action: "CERTIFICATE_REVOKED",
     targetType: "CERTIFICATE",
     targetId: id,
-    targetName: certificates[idx].studentName,
-    newValue: `Revoked certificate ${id}. Reason: ${reason || "Super Admin Revocation"}`,
+    targetName: cert.studentName,
+    newValue: `Revoked certificate ${id}. Reason: ${reason}`,
     ipAddress: req.ip
   });
 
-  res.json({ success: true, certificate: certificates[idx] });
+  res.json({ success: true, certificate: cert });
 });
 
 // ------------------- ADMIN COMMUNICATIONS & BROADCASTS -------------------
